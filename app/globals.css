@@ -1,26 +1,505 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Warm wood tones */
+  --wood-dark: #2a1f1a;
+  --wood-medium: #3d2e24;
+  --wood-light: #5c4333;
+  --wood-grain: #4a3628;
+
+  /* Warm light */
+  --amber-glow: #f4a942;
+  --warm-light: rgba(244, 169, 66, 0.15);
+  --warm-light-strong: rgba(244, 169, 66, 0.25);
+
+  /* Paper varieties */
+  --legal-yellow: #fff9c4;
+  --legal-yellow-shadow: #e6d98a;
+  --aged-paper: #f5e6d3;
+  --aged-paper-dark: #d4c4a8;
+  --notebook-white: #fafafa;
+  --notebook-lines: #c5d1e8;
+  --manila: #e8d4a8;
+  --cardstock: #f0ebe0;
+
+  /* Ink */
+  --ink-black: #1a1a1a;
+  --ink-blue: #1a3a5c;
+  --pencil-gray: #4a4a4a;
+  --pen-blue: #2c4a7c;
+
+  /* Accents */
+  --tape: rgba(255, 248, 220, 0.5);
+  --pin-red: #c0392b;
+  --coffee-stain: rgba(139, 90, 43, 0.15);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-serif);
+  --font-typewriter: var(--font-typewriter);
+  --font-handwritten: var(--font-handwritten);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-serif), Georgia, serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+::selection {
+  background: var(--amber-glow);
+  color: var(--wood-dark);
+}
+
+/* The garage/workshop space */
+.workshop {
+  height: 100vh;
+  overflow: hidden;
+  background:
+    /* Warm overhead light glow */
+    radial-gradient(ellipse 60% 40% at 50% 10%, var(--warm-light-strong) 0%, transparent 60%),
+    /* Secondary ambient light */
+    radial-gradient(ellipse 80% 60% at 30% 80%, var(--warm-light) 0%, transparent 50%),
+    /* Wood grain texture simulation */
+    repeating-linear-gradient(
+      90deg,
+      var(--wood-dark) 0px,
+      var(--wood-medium) 2px,
+      var(--wood-dark) 4px,
+      var(--wood-grain) 8px,
+      var(--wood-dark) 12px
+    ),
+    /* Base wood color */
+    var(--wood-dark);
+  padding: 3rem 2rem;
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .workshop {
+    padding: 4rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .workshop {
+    padding: 5rem 8rem;
+  }
+}
+
+/* Vignette - like edges of vision in dim room */
+.workshop::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 70% at 50% 50%,
+    transparent 30%,
+    rgba(20, 15, 12, 0.4) 70%,
+    rgba(20, 15, 12, 0.8) 100%
+  );
+  z-index: 1000;
+}
+
+/* Dust particles in light */
+.workshop::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* The workbench surface where items are scattered */
+.workbench {
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* Base fragment styles */
+.fragment {
+  position: absolute;
+  cursor: grab;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  user-select: none;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.fragment.focused {
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.fragment:not(.focused):not(.dragging):hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow:
+    2px 6px 12px rgba(0,0,0,0.25),
+    4px 10px 20px rgba(0,0,0,0.15);
+}
+
+/* ========================================
+   PAPER TYPES - Each visually distinct
+   ======================================== */
+
+/* Yellow legal pad */
+.legal-pad {
+  background:
+    repeating-linear-gradient(
+      transparent 0px,
+      transparent 27px,
+      #d4c48a 27px,
+      #d4c48a 28px
+    ),
+    linear-gradient(135deg, var(--legal-yellow) 0%, #fff59d 100%);
+  padding: 2rem 1.5rem 1.5rem 2.5rem;
+  border-left: 3px solid #ef9a9a;
+  box-shadow:
+    2px 3px 8px rgba(0,0,0,0.3),
+    4px 6px 20px rgba(0,0,0,0.2),
+    inset 0 0 30px rgba(139, 115, 85, 0.05);
+  font-family: var(--font-handwritten), cursive;
+  font-size: 1.4rem;
+  line-height: 1.95;
+  color: var(--ink-black);
+}
+
+.legal-pad:not(.focused):hover {
+  box-shadow:
+    4px 8px 16px rgba(0,0,0,0.35),
+    8px 16px 40px rgba(0,0,0,0.25);
+}
+
+/* Aged/antique paper for classic quotes */
+.aged-paper {
+  background:
+    /* Coffee stain */
+    radial-gradient(ellipse at 80% 20%, var(--coffee-stain) 0%, transparent 50%),
+    /* Aged texture */
+    linear-gradient(135deg, var(--aged-paper) 0%, var(--aged-paper-dark) 50%, var(--aged-paper) 100%);
+  padding: 2rem;
+  box-shadow:
+    1px 2px 6px rgba(0,0,0,0.25),
+    3px 5px 15px rgba(0,0,0,0.15),
+    inset 0 0 50px rgba(139, 90, 43, 0.08);
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--ink-black);
+  font-style: italic;
+}
+
+.aged-paper::after {
+  content: '"';
+  position: absolute;
+  top: 0.5rem;
+  left: 0.8rem;
+  font-size: 3rem;
+  opacity: 0.15;
+  font-family: Georgia, serif;
+}
+
+.aged-paper:not(.focused):hover {
+  box-shadow:
+    3px 6px 12px rgba(0,0,0,0.3),
+    6px 12px 30px rgba(0,0,0,0.2);
+}
+
+/* Typewriter paper */
+.typewriter-paper {
+  background: var(--notebook-white);
+  padding: 1.5rem 2rem;
+  box-shadow:
+    1px 2px 4px rgba(0,0,0,0.2),
+    2px 4px 12px rgba(0,0,0,0.1);
+  font-family: var(--font-typewriter), monospace;
+  font-size: 0.95rem;
+  line-height: 1.9;
+  color: var(--ink-black);
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.typewriter-paper:not(.focused):hover {
+  box-shadow:
+    2px 4px 8px rgba(0,0,0,0.25),
+    4px 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Notebook paper with blue lines */
+.notebook {
+  background:
+    repeating-linear-gradient(
+      transparent 0px,
+      transparent 23px,
+      var(--notebook-lines) 23px,
+      var(--notebook-lines) 24px
+    ),
+    var(--notebook-white);
+  padding: 1.5rem 1.5rem 1.5rem 3rem;
+  border-left: 2px solid #ffcdd2;
+  box-shadow:
+    1px 2px 5px rgba(0,0,0,0.2),
+    2px 4px 12px rgba(0,0,0,0.1);
+  font-family: var(--font-handwritten), cursive;
+  font-size: 1.3rem;
+  line-height: 1.85;
+  color: var(--pen-blue);
+}
+
+.notebook:not(.focused):hover {
+  box-shadow:
+    2px 4px 10px rgba(0,0,0,0.25),
+    4px 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Manila card/index card */
+.manila-card {
+  background: var(--manila);
+  padding: 1.25rem 1.5rem;
+  box-shadow:
+    1px 1px 3px rgba(0,0,0,0.2),
+    2px 3px 8px rgba(0,0,0,0.1);
+  font-family: var(--font-typewriter), monospace;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--ink-black);
+  border-top: 3px solid var(--wood-light);
+}
+
+.manila-card:not(.focused):hover {
+  box-shadow:
+    2px 3px 6px rgba(0,0,0,0.25),
+    3px 6px 15px rgba(0,0,0,0.15);
+}
+
+/* Torn paper scrap */
+.torn-scrap {
+  background: var(--cardstock);
+  padding: 1.2rem 1.5rem;
+  box-shadow:
+    1px 1px 4px rgba(0,0,0,0.2),
+    2px 3px 10px rgba(0,0,0,0.1);
+  font-family: var(--font-handwritten), cursive;
+  font-size: 1.2rem;
+  color: var(--pencil-gray);
+  border-radius: 3px 6px 4px 2px;
+  border-top: 1px solid rgba(255,255,255,0.5);
+  border-left: 1px solid rgba(255,255,255,0.3);
+}
+
+.torn-scrap:not(.focused):hover {
+  box-shadow:
+    2px 3px 8px rgba(0,0,0,0.25),
+    3px 6px 18px rgba(0,0,0,0.15);
+}
+
+/* Video/media reference - looks like a dark polaroid */
+.media-card {
+  background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%);
+  padding: 0.5rem;
+  padding-bottom: 0.5rem;
+  box-shadow:
+    2px 3px 8px rgba(0,0,0,0.4),
+    4px 6px 20px rgba(0,0,0,0.3);
+  color: var(--aged-paper);
+  border: 1px solid rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+
+.media-card .media-placeholder {
+  background: linear-gradient(135deg, #3d3d3d 0%, #2a2a2a 100%);
+  background-size: cover;
+  background-position: center;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+}
+
+.media-card .play-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+.media-card .title {
+  font-family: var(--font-serif), serif;
+  font-size: 0.85rem;
+  margin-bottom: 0.2rem;
+  padding: 0 0.25rem;
+  line-height: 1.3;
+}
+
+.media-card .author {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  padding: 0 0.25rem;
+}
+
+.media-card:not(.focused):hover {
+  box-shadow:
+    4px 6px 16px rgba(0,0,0,0.5),
+    8px 12px 35px rgba(0,0,0,0.4);
+}
+
+/* Embedded video in media card */
+.media-card .media-embed {
+  width: 100%;
+}
+
+.media-card .media-embed iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  margin-bottom: 0.5rem;
+}
+
+.media-card .media-info .title {
+  font-size: 0.85rem;
+  margin-bottom: 0.2rem;
+}
+
+.media-card .media-info .author {
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+/* Tape effect */
+.has-tape::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 60px;
+  height: 20px;
+  background: var(--tape);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  z-index: 1;
+}
+
+/* Pin effect */
+.has-pin {
+  overflow: visible !important;
+}
+
+.has-pin::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 35% 35%, #ff6b6b 0%, #e74c3c 40%, var(--pin-red) 70%, #7f1d1d 100%);
+  border-radius: 50%;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.4),
+    0 1px 2px rgba(0,0,0,0.2),
+    inset 0 -2px 4px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+
+/* Attribution line */
+.attribution {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  text-align: right;
+  font-style: normal;
+  font-family: var(--font-serif), serif;
+}
+
+
+/* Focus overlay */
+.focus-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 15, 12, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  z-index: 500;
+  pointer-events: none;
+  transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              backdrop-filter 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              -webkit-backdrop-filter 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: background, backdrop-filter;
+}
+
+.focus-overlay.active {
+  background: rgba(20, 15, 12, 0.8);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* Dragging state */
+.fragment.dragging {
+  cursor: grabbing !important;
+  box-shadow:
+    0 25px 50px rgba(0,0,0,0.5),
+    0 12px 20px rgba(0,0,0,0.3) !important;
+}
+
+/* Mobile: stack vertically */
+@media (max-width: 900px) {
+  .workbench {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .fragment {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+    width: 100% !important;
+  }
+
+  .fragment:hover {
+    transform: none !important;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--wood-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--wood-light);
+  border-radius: 4px;
 }
