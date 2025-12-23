@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useSyncExternalStore, useMemo } from "react";
 
 // Helper to extract YouTube video ID from various URL formats
 function getYouTubeId(url: string): string | null {
@@ -34,6 +34,42 @@ const fragments = [
 type Fragment = (typeof fragments)[number];
 type Position = { x: number; y: number };
 
+// Persisted layout store
+type LayoutData = { positions: Record<number, Position>; zIndexes: Record<number, number>; maxZ: number };
+
+const layoutStore = (() => {
+  const listeners = new Set<() => void>();
+  let data: LayoutData | null = null;
+  let isLoaded = false;
+  let snapshot = { data, isLoaded };
+  const serverSnapshot = { data: null, isLoaded: false };
+
+  if (typeof window !== "undefined") {
+    try { data = JSON.parse(localStorage.getItem("library-layout") || "null"); } catch {}
+    isLoaded = true;
+    snapshot = { data, isLoaded };
+  }
+
+  return {
+    subscribe: (cb: () => void) => { listeners.add(cb); return () => listeners.delete(cb); },
+    getSnapshot: () => snapshot,
+    getServerSnapshot: () => serverSnapshot,
+    save: (newData: LayoutData) => {
+      try {
+        localStorage.setItem("library-layout", JSON.stringify(newData));
+        data = newData;
+        snapshot = { data, isLoaded };
+        listeners.forEach(cb => cb());
+      } catch {}
+    },
+  };
+})();
+
+function useLayout() {
+  const { data, isLoaded } = useSyncExternalStore(layoutStore.subscribe, layoutStore.getSnapshot, layoutStore.getServerSnapshot);
+  return { layout: data, isLoaded, saveLayout: layoutStore.save };
+}
+
 // Map fragment types to CSS classes
 const typeClasses: Record<string, string> = {
   "legal-pad": "legal-pad",
@@ -46,9 +82,10 @@ const typeClasses: Record<string, string> = {
 };
 
 export default function Library() {
-  // Positions after dragging
-  const [positions, setPositions] = useState<Record<number, Position>>({});
-  const [zIndexes, setZIndexes] = useState<Record<number, number>>({});
+  // Persisted positions
+  const { layout, isLoaded, saveLayout } = useLayout();
+  const positions = useMemo(() => layout?.positions ?? {}, [layout]);
+  const zIndexes = useMemo(() => layout?.zIndexes ?? {}, [layout]);
 
   // Focus state
   const [focusedId, setFocusedId] = useState<number | null>(null);
@@ -62,7 +99,12 @@ export default function Library() {
   // Refs
   const dragStartRef = useRef<{ x: number; y: number; elemX: number; elemY: number } | null>(null);
   const didDragRef = useRef(false);
-  const maxZRef = useRef(20);
+  const maxZRef = useRef(layout?.maxZ ?? 20);
+
+  const persistLayout = useCallback((newPositions: Record<number, Position>, newZIndexes: Record<number, number>, newMaxZ: number) => {
+    maxZRef.current = newMaxZ;
+    saveLayout({ positions: newPositions, zIndexes: newZIndexes, maxZ: newMaxZ });
+  }, [saveLayout]);
 
   // Handle drag move/end
   useEffect(() => {
@@ -83,9 +125,10 @@ export default function Library() {
 
     const handleEnd = () => {
       if (draggingId !== null && dragPos) {
-        setPositions(prev => ({ ...prev, [draggingId]: dragPos }));
-        maxZRef.current += 1;
-        setZIndexes(prev => ({ ...prev, [draggingId]: maxZRef.current }));
+        const newMaxZ = maxZRef.current + 1;
+        const newPositions = { ...positions, [draggingId]: dragPos };
+        const newZIndexes = { ...zIndexes, [draggingId]: newMaxZ };
+        persistLayout(newPositions, newZIndexes, newMaxZ);
       }
       setDraggingId(null);
       setDragPos(null);
@@ -102,7 +145,7 @@ export default function Library() {
       window.removeEventListener("touchmove", handleMove);
       window.removeEventListener("touchend", handleEnd);
     };
-  }, [draggingId, dragPos]);
+  }, [draggingId, dragPos, positions, zIndexes, persistLayout]);
 
   // Start dragging
   const handlePointerDown = useCallback((id: number, e: React.MouseEvent | React.TouchEvent, rect: DOMRect) => {
@@ -114,9 +157,10 @@ export default function Library() {
     setDraggingId(id);
     setDragPos({ x: rect.left, y: rect.top });
 
-    maxZRef.current += 1;
-    setZIndexes(prev => ({ ...prev, [id]: maxZRef.current }));
-  }, []);
+    const newMaxZ = maxZRef.current + 1;
+    const newZIndexes = { ...zIndexes, [id]: newMaxZ };
+    persistLayout(positions, newZIndexes, newMaxZ);
+  }, [positions, zIndexes, persistLayout]);
 
   // Handle click to focus/unfocus
   const handleClick = useCallback((id: number, rect: DOMRect) => {
@@ -278,7 +322,7 @@ export default function Library() {
       />
 
       <div className="workbench">
-        {fragments.map((item) => {
+        {isLoaded && fragments.map((item) => {
           const isDragging = draggingId === item.id;
           const isFocused = focusedId === item.id;
           const isFullyOpen = isFocused && focusPhase === "open";
