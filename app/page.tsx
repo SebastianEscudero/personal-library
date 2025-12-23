@@ -26,6 +26,7 @@ const fragments = [
   { id: 13, type: "media", title: "Michael Jordan's Wisdom", url: "https://www.youtube.com/watch?v=EUo0ncJX19A", top: "18%", right: "5%", width: "180px", rotate: -2.5, z: 10 },
   // Row 3
   { id: 22, type: "notebook", text: "There's no greater danger than playing it safe.", top: "32%", left: "5%", width: "220px", rotate: 1.5, z: 6 },
+  { id: 23, type: "aged-paper", text: "The torment of precautions often exceeds the dangers to be avoided. It is sometimes better to abandon one's self to destiny.", author: "Napoleon", top: "30%", right: "5%", width: "260px", rotate: -1.8, z: 7, pin: true },
   // Row 4 - larger cards
   { id: 20, type: "legal-pad", text: "Here's to the crazy ones. The misfits. The rebels. The troublemakers. The round pegs in the square holes. The ones who see things differently. They're not fond of rules. And they have no respect for the status quo. You can quote them, disagree with them, glorify or vilify them. About the only thing you can't do is ignore them. Because they change things. They push the human race forward. And while some may see them as the crazy ones, we see genius. Because the people who are crazy enough to think they can change the world, are the ones who do.", author: "Steve Jobs", top: "44%", left: "3%", width: "320px", rotate: 0.8, z: 7, tape: true, fontSize: "1rem" },
   { id: 21, type: "torn-scrap", text: "You are not your job. You're not how much money you have in the bank. You're not the car you drive. You're not the contents of your wallet. You're not your fucking khakis.", author: "Tyler Durden", top: "46%", right: "5%", width: "300px", rotate: -2, z: 8, pin: true },
@@ -38,11 +39,12 @@ type Position = { x: number; y: number };
 type LayoutData = { positions: Record<number, Position>; zIndexes: Record<number, number>; maxZ: number };
 
 const layoutStore = (() => {
+  type Snapshot = { data: LayoutData | null; isLoaded: boolean };
   const listeners = new Set<() => void>();
   let data: LayoutData | null = null;
   let isLoaded = false;
-  let snapshot = { data, isLoaded };
-  const serverSnapshot = { data: null, isLoaded: false };
+  let snapshot: Snapshot = { data, isLoaded };
+  const serverSnapshot: Snapshot = { data: null, isLoaded: false };
 
   if (typeof window !== "undefined") {
     try { data = JSON.parse(localStorage.getItem("library-layout") || "null"); } catch {}
