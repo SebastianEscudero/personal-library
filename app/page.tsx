@@ -30,6 +30,8 @@ const fragments = [
   // Row 4 - larger cards
   { id: 20, type: "legal-pad", text: "Here's to the crazy ones. The misfits. The rebels. The troublemakers. The round pegs in the square holes. The ones who see things differently. They're not fond of rules. And they have no respect for the status quo. You can quote them, disagree with them, glorify or vilify them. About the only thing you can't do is ignore them. Because they change things. They push the human race forward. And while some may see them as the crazy ones, we see genius. Because the people who are crazy enough to think they can change the world, are the ones who do.", author: "Steve Jobs", top: "44%", left: "3%", width: "320px", rotate: 0.8, z: 7, tape: true, fontSize: "1rem" },
   { id: 21, type: "torn-scrap", text: "You are not your job. You're not how much money you have in the bank. You're not the car you drive. You're not the contents of your wallet. You're not your fucking khakis.", author: "Tyler Durden", top: "46%", right: "5%", width: "300px", rotate: -2, z: 8, pin: true },
+  // Row 5
+  { id: 24, type: "aged-paper", text: "Fortune favors the bold.", author: "Virgil", top: "68%", left: "5%", width: "220px", rotate: -1.2, z: 6, tape: true },
 ];
 
 type Fragment = (typeof fragments)[number];
@@ -101,12 +103,14 @@ export default function Library() {
   // Refs
   const dragStartRef = useRef<{ x: number; y: number; elemX: number; elemY: number } | null>(null);
   const didDragRef = useRef(false);
-  const maxZRef = useRef(layout?.maxZ ?? 20);
 
-  const persistLayout = useCallback((newPositions: Record<number, Position>, newZIndexes: Record<number, number>, newMaxZ: number) => {
-    maxZRef.current = newMaxZ;
-    saveLayout({ positions: newPositions, zIndexes: newZIndexes, maxZ: newMaxZ });
-  }, [saveLayout]);
+  const getNextMaxZ = useCallback(() => {
+    const storeData = layoutStore.getSnapshot().data;
+    const storedMaxZ = storeData?.maxZ ?? 0;
+    const zValues = Object.values(storeData?.zIndexes ?? {}) as number[];
+    const highestZ = zValues.length > 0 ? Math.max(...zValues) : 0;
+    return Math.max(storedMaxZ, highestZ, 20) + 1;
+  }, []);
 
   // Handle drag move/end
   useEffect(() => {
@@ -127,10 +131,13 @@ export default function Library() {
 
     const handleEnd = () => {
       if (draggingId !== null && dragPos) {
-        const newMaxZ = maxZRef.current + 1;
-        const newPositions = { ...positions, [draggingId]: dragPos };
-        const newZIndexes = { ...zIndexes, [draggingId]: newMaxZ };
-        persistLayout(newPositions, newZIndexes, newMaxZ);
+        const storeData = layoutStore.getSnapshot().data;
+        const currentPositions = storeData?.positions ?? {};
+        const currentZIndexes = storeData?.zIndexes ?? {};
+        const newMaxZ = getNextMaxZ();
+        const newPositions = { ...currentPositions, [draggingId]: dragPos };
+        const newZIndexes = { ...currentZIndexes, [draggingId]: newMaxZ };
+        saveLayout({ positions: newPositions, zIndexes: newZIndexes, maxZ: newMaxZ });
       }
       setDraggingId(null);
       setDragPos(null);
@@ -147,7 +154,7 @@ export default function Library() {
       window.removeEventListener("touchmove", handleMove);
       window.removeEventListener("touchend", handleEnd);
     };
-  }, [draggingId, dragPos, positions, zIndexes, persistLayout]);
+  }, [draggingId, dragPos, getNextMaxZ, saveLayout]);
 
   // Start dragging
   const handlePointerDown = useCallback((id: number, e: React.MouseEvent | React.TouchEvent, rect: DOMRect) => {
@@ -159,10 +166,13 @@ export default function Library() {
     setDraggingId(id);
     setDragPos({ x: rect.left, y: rect.top });
 
-    const newMaxZ = maxZRef.current + 1;
-    const newZIndexes = { ...zIndexes, [id]: newMaxZ };
-    persistLayout(positions, newZIndexes, newMaxZ);
-  }, [positions, zIndexes, persistLayout]);
+    const storeData = layoutStore.getSnapshot().data;
+    const currentPositions = storeData?.positions ?? {};
+    const currentZIndexes = storeData?.zIndexes ?? {};
+    const newMaxZ = getNextMaxZ();
+    const newZIndexes = { ...currentZIndexes, [id]: newMaxZ };
+    saveLayout({ positions: currentPositions, zIndexes: newZIndexes, maxZ: newMaxZ });
+  }, [getNextMaxZ, saveLayout]);
 
   // Handle click to focus/unfocus
   const handleClick = useCallback((id: number, rect: DOMRect) => {

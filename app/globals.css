@@ -1,37 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  /* Warm wood tones */
-  --wood-dark: #2a1f1a;
-  --wood-medium: #3d2e24;
-  --wood-light: #5c4333;
-  --wood-grain: #4a3628;
+  /* Warm wood tones - darker, more worn */
+  --wood-dark: #1f1814;
+  --wood-medium: #342820;
+  --wood-light: #4a382a;
+  --wood-grain: #3d2c20;
 
-  /* Warm light */
-  --amber-glow: #f4a942;
-  --warm-light: rgba(244, 169, 66, 0.15);
-  --warm-light-strong: rgba(244, 169, 66, 0.25);
+  /* Warm light - dimmer, more amber */
+  --amber-glow: #d4923a;
+  --warm-light: rgba(180, 130, 60, 0.12);
+  --warm-light-strong: rgba(180, 130, 60, 0.22);
 
-  /* Paper varieties */
-  --legal-yellow: #fff9c4;
-  --legal-yellow-shadow: #e6d98a;
-  --aged-paper: #f5e6d3;
-  --aged-paper-dark: #d4c4a8;
-  --notebook-white: #fafafa;
-  --notebook-lines: #c5d1e8;
-  --manila: #e8d4a8;
-  --cardstock: #f0ebe0;
+  /* Paper varieties - more yellowed, aged */
+  --legal-yellow: #f0e4a8;
+  --legal-yellow-shadow: #c9b86e;
+  --aged-paper: #e8d5b8;
+  --aged-paper-dark: #c4a882;
+  --notebook-white: #f2ece4;
+  --notebook-lines: #a8b8c8;
+  --manila: #d8c494;
+  --cardstock: #e4dac8;
 
-  /* Ink */
-  --ink-black: #1a1a1a;
-  --ink-blue: #1a3a5c;
-  --pencil-gray: #4a4a4a;
-  --pen-blue: #2c4a7c;
+  /* Ink - faded */
+  --ink-black: #2a2420;
+  --ink-blue: #1a3048;
+  --pencil-gray: #5a524a;
+  --pen-blue: #384860;
 
   /* Accents */
-  --tape: rgba(255, 248, 220, 0.5);
-  --pin-red: #c0392b;
-  --coffee-stain: rgba(139, 90, 43, 0.15);
+  --tape: rgba(220, 210, 170, 0.65);
+  --tape-edge: rgba(160, 140, 100, 0.3);
+  --pin-red: #a83228;
+  --coffee-stain: rgba(120, 70, 30, 0.18);
+  --foxing: rgba(140, 100, 60, 0.12);
+  --water-stain: rgba(100, 90, 70, 0.08);
 }
 
 @theme inline {
@@ -49,7 +52,8 @@
 body {
   font-family: var(--font-serif), Georgia, serif;
   line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
   overflow-x: hidden;
   min-height: 100vh;
 }
@@ -64,21 +68,24 @@ body {
   height: 100vh;
   overflow: hidden;
   background:
-    /* Warm overhead light glow */
-    radial-gradient(ellipse 60% 40% at 50% 10%, var(--warm-light-strong) 0%, transparent 60%),
-    /* Secondary ambient light */
-    radial-gradient(ellipse 80% 60% at 30% 80%, var(--warm-light) 0%, transparent 50%),
-    /* Wood grain texture simulation */
+    /* Heavy dust/grain overlay */
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    /* Warm overhead light - dimmer */
+    radial-gradient(ellipse 50% 35% at 50% 8%, var(--warm-light-strong) 0%, transparent 70%),
+    /* Secondary ambient - subtle */
+    radial-gradient(ellipse 70% 50% at 25% 85%, var(--warm-light) 0%, transparent 60%),
+    /* Wood grain - more pronounced */
     repeating-linear-gradient(
-      90deg,
+      92deg,
       var(--wood-dark) 0px,
-      var(--wood-medium) 2px,
-      var(--wood-dark) 4px,
-      var(--wood-grain) 8px,
-      var(--wood-dark) 12px
+      var(--wood-medium) 3px,
+      var(--wood-dark) 5px,
+      var(--wood-grain) 9px,
+      var(--wood-dark) 14px,
+      var(--wood-medium) 16px
     ),
-    /* Base wood color */
     var(--wood-dark);
+  background-blend-mode: overlay, normal, normal, normal, normal;
   padding: 3rem 2rem;
   position: relative;
 }
@@ -95,22 +102,22 @@ body {
   }
 }
 
-/* Vignette - like edges of vision in dim room */
+/* Heavy vignette - like edges of vision in dim room */
 .workshop::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
   background: radial-gradient(
-    ellipse 70% 70% at 50% 50%,
-    transparent 30%,
-    rgba(20, 15, 12, 0.4) 70%,
-    rgba(20, 15, 12, 0.8) 100%
+    ellipse 65% 65% at 50% 50%,
+    transparent 20%,
+    rgba(15, 10, 8, 0.5) 60%,
+    rgba(10, 8, 6, 0.85) 100%
   );
   z-index: 1000;
 }
 
-/* Dust particles in light */
+/* Film grain overlay */
 .workshop::after {
   content: '';
   position: fixed;
@@ -120,11 +127,12 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 999;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
 }
 
-/* The workbench surface where items are scattered */
+/* The workbench surface */
 .workbench {
   position: relative;
   max-width: 1400px;
@@ -136,7 +144,7 @@ body {
 .fragment {
   position: absolute;
   cursor: grab;
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition: filter 0.2s ease;
   user-select: none;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -144,208 +152,273 @@ body {
 
 .fragment.focused {
   cursor: pointer;
-  box-shadow: none;
 }
 
 .fragment:not(.focused):not(.dragging):hover {
-  transform: translateY(-3px) scale(1.01);
-  box-shadow:
-    2px 6px 12px rgba(0,0,0,0.25),
-    4px 10px 20px rgba(0,0,0,0.15);
+  filter: brightness(1.05);
 }
 
 /* ========================================
-   PAPER TYPES - Each visually distinct
+   PAPER TEXTURE OVERLAYS
    ======================================== */
 
-/* Yellow legal pad */
+/* Paper fiber texture - applied to all paper types */
+.fragment::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+  border-radius: inherit;
+}
+
+/* ========================================
+   PAPER TYPES - Weathered and worn
+   ======================================== */
+
+/* Yellow legal pad - well-used */
 .legal-pad {
   background:
+    /* Foxing spots */
+    radial-gradient(ellipse 8px 6px at 15% 30%, var(--foxing) 0%, transparent 100%),
+    radial-gradient(ellipse 5px 7px at 75% 60%, var(--foxing) 0%, transparent 100%),
+    radial-gradient(ellipse 6px 5px at 40% 85%, var(--foxing) 0%, transparent 100%),
+    /* Water stain bottom corner */
+    radial-gradient(ellipse 40% 30% at 90% 95%, var(--water-stain) 0%, transparent 70%),
+    /* Ruled lines - irregular */
     repeating-linear-gradient(
       transparent 0px,
-      transparent 27px,
-      #d4c48a 27px,
-      #d4c48a 28px
+      transparent 26px,
+      rgba(180, 160, 110, 0.5) 26px,
+      rgba(180, 160, 110, 0.4) 27px,
+      transparent 28px
     ),
-    linear-gradient(135deg, var(--legal-yellow) 0%, #fff59d 100%);
+    /* Uneven yellowing */
+    linear-gradient(165deg, var(--legal-yellow) 0%, #e8d890 40%, var(--legal-yellow) 70%, #ddd080 100%);
   padding: 2rem 1.5rem 1.5rem 2.5rem;
-  border-left: 3px solid #ef9a9a;
+  border-left: 2px solid rgba(200, 120, 120, 0.5);
   box-shadow:
-    2px 3px 8px rgba(0,0,0,0.3),
-    4px 6px 20px rgba(0,0,0,0.2),
-    inset 0 0 30px rgba(139, 115, 85, 0.05);
+    1px 2px 3px rgba(0,0,0,0.25),
+    2px 4px 8px rgba(0,0,0,0.15);
   font-family: var(--font-handwritten), cursive;
   font-size: 1.4rem;
   line-height: 1.95;
   color: var(--ink-black);
+  /* Rough edges */
+  clip-path: polygon(
+    0% 1%, 2% 0%, 5% 0.5%, 10% 0%, 15% 0.3%, 25% 0%, 35% 0.2%, 50% 0%, 65% 0.4%, 80% 0%, 90% 0.2%, 95% 0%, 98% 0.3%, 100% 0%,
+    100% 2%, 99.5% 5%, 100% 15%, 99.7% 30%, 100% 50%, 99.8% 70%, 100% 85%, 99.5% 95%, 100% 100%,
+    98% 100%, 95% 99.5%, 85% 100%, 70% 99.7%, 50% 100%, 30% 99.8%, 15% 100%, 5% 99.5%, 0% 100%,
+    0% 98%, 0.5% 90%, 0% 75%, 0.3% 55%, 0% 35%, 0.2% 15%, 0% 5%
+  );
 }
 
-.legal-pad:not(.focused):hover {
-  box-shadow:
-    4px 8px 16px rgba(0,0,0,0.35),
-    8px 16px 40px rgba(0,0,0,0.25);
-}
-
-/* Aged/antique paper for classic quotes */
+/* Aged/antique paper - genuinely old */
 .aged-paper {
   background:
-    /* Coffee stain */
-    radial-gradient(ellipse at 80% 20%, var(--coffee-stain) 0%, transparent 50%),
-    /* Aged texture */
-    linear-gradient(135deg, var(--aged-paper) 0%, var(--aged-paper-dark) 50%, var(--aged-paper) 100%);
+    /* Foxing clusters */
+    radial-gradient(ellipse 4px 5px at 20% 15%, rgba(130, 90, 50, 0.15) 0%, transparent 100%),
+    radial-gradient(ellipse 6px 4px at 25% 18%, rgba(120, 85, 45, 0.12) 0%, transparent 100%),
+    radial-gradient(ellipse 5px 6px at 80% 70%, rgba(140, 95, 55, 0.14) 0%, transparent 100%),
+    radial-gradient(ellipse 7px 5px at 85% 75%, rgba(125, 88, 48, 0.1) 0%, transparent 100%),
+    radial-gradient(ellipse 3px 4px at 60% 40%, rgba(135, 92, 52, 0.11) 0%, transparent 100%),
+    /* Coffee ring */
+    radial-gradient(ellipse 45px 40px at 78% 25%, transparent 55%, rgba(100, 65, 30, 0.12) 60%, rgba(100, 65, 30, 0.08) 70%, transparent 75%),
+    /* Fold crease */
+    linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.03) 49%, rgba(255,255,255,0.05) 50%, rgba(0,0,0,0.02) 51%, transparent 52%),
+    /* Water damage edge */
+    radial-gradient(ellipse 60% 40% at 5% 90%, var(--water-stain) 0%, transparent 60%),
+    /* Uneven aging */
+    linear-gradient(145deg, var(--aged-paper) 0%, var(--aged-paper-dark) 35%, var(--aged-paper) 60%, #d0b890 85%, var(--aged-paper-dark) 100%);
   padding: 2rem;
   box-shadow:
-    1px 2px 6px rgba(0,0,0,0.25),
-    3px 5px 15px rgba(0,0,0,0.15),
-    inset 0 0 50px rgba(139, 90, 43, 0.08);
+    0 1px 2px rgba(0,0,0,0.2),
+    1px 2px 4px rgba(0,0,0,0.12);
   font-family: var(--font-serif), Georgia, serif;
   font-size: 1.1rem;
   line-height: 1.8;
   color: var(--ink-black);
   font-style: italic;
+  /* Worn edges */
+  clip-path: polygon(
+    1% 0%, 3% 0.8%, 8% 0%, 15% 0.5%, 25% 0%, 40% 0.3%, 55% 0%, 70% 0.6%, 85% 0%, 92% 0.4%, 97% 0%, 99% 0.5%, 100% 1%,
+    100% 3%, 99.3% 10%, 100% 25%, 99.6% 40%, 100% 60%, 99.4% 80%, 100% 92%, 99.5% 97%, 99% 100%,
+    97% 99.5%, 90% 100%, 75% 99.6%, 55% 100%, 35% 99.4%, 20% 100%, 8% 99.6%, 2% 100%, 0% 99%,
+    0.5% 95%, 0% 80%, 0.4% 60%, 0% 40%, 0.3% 20%, 0% 8%, 0.6% 2%
+  );
 }
 
-.aged-paper::after {
-  content: '"';
+/* Faded quotation mark */
+.aged-paper::before {
+  content: '';
   position: absolute;
-  top: 0.5rem;
-  left: 0.8rem;
-  font-size: 3rem;
-  opacity: 0.15;
-  font-family: Georgia, serif;
+  top: 0.8rem;
+  left: 1rem;
+  width: 24px;
+  height: 20px;
+  opacity: 0.12;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 20'%3E%3Cpath fill='%23000' d='M0 12.5c0-4 2.5-8 7-10l1 1.5c-3 1.5-4 4-4 6.5 0 1 .5 1.5 1.5 1.5 1.5 0 3 1 3 3s-1.5 3.5-3.5 3.5S0 16 0 12.5zm13 0c0-4 2.5-8 7-10l1 1.5c-3 1.5-4 4-4 6.5 0 1 .5 1.5 1.5 1.5 1.5 0 3 1 3 3s-1.5 3.5-3.5 3.5-4.5-2.5-4.5-5.5z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
-.aged-paper:not(.focused):hover {
-  box-shadow:
-    3px 6px 12px rgba(0,0,0,0.3),
-    6px 12px 30px rgba(0,0,0,0.2);
-}
-
-/* Typewriter paper */
+/* Typewriter paper - office aged */
 .typewriter-paper {
-  background: var(--notebook-white);
+  background:
+    /* Foxing */
+    radial-gradient(ellipse 4px 5px at 10% 20%, var(--foxing) 0%, transparent 100%),
+    radial-gradient(ellipse 5px 4px at 90% 80%, var(--foxing) 0%, transparent 100%),
+    /* Slight yellowing at edges */
+    radial-gradient(ellipse 100% 100% at 50% 50%, var(--notebook-white) 60%, rgba(230, 218, 195, 0.5) 100%),
+    var(--notebook-white);
   padding: 1.5rem 2rem;
   box-shadow:
-    1px 2px 4px rgba(0,0,0,0.2),
-    2px 4px 12px rgba(0,0,0,0.1);
+    0 1px 2px rgba(0,0,0,0.15),
+    1px 2px 5px rgba(0,0,0,0.1);
   font-family: var(--font-typewriter), monospace;
   font-size: 0.95rem;
   line-height: 1.9;
   color: var(--ink-black);
   letter-spacing: 0.02em;
-  border: 1px solid rgba(0,0,0,0.05);
+  /* Ink slightly faded, uneven */
+  text-shadow: 0.3px 0 0 rgba(0,0,0,0.05);
+  clip-path: polygon(
+    0% 0.5%, 5% 0%, 15% 0.3%, 40% 0%, 60% 0.2%, 85% 0%, 95% 0.4%, 100% 0%,
+    100% 1%, 99.7% 20%, 100% 50%, 99.8% 80%, 100% 99%,
+    95% 100%, 80% 99.7%, 50% 100%, 20% 99.8%, 5% 100%, 0% 99.5%,
+    0.3% 80%, 0% 50%, 0.2% 20%, 0% 2%
+  );
 }
 
-.typewriter-paper:not(.focused):hover {
-  box-shadow:
-    2px 4px 8px rgba(0,0,0,0.25),
-    4px 8px 20px rgba(0,0,0,0.15);
-}
-
-/* Notebook paper with blue lines */
+/* Notebook paper - school worn */
 .notebook {
   background:
+    /* Fold crease in middle */
+    linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.02) 49.5%, rgba(255,255,255,0.03) 50%, rgba(0,0,0,0.015) 50.5%, transparent 52%),
+    /* Eraser smudge */
+    radial-gradient(ellipse 30px 20px at 70% 30%, rgba(200, 190, 180, 0.15) 0%, transparent 70%),
+    /* Blue lines - slightly faded */
     repeating-linear-gradient(
       transparent 0px,
-      transparent 23px,
-      var(--notebook-lines) 23px,
-      var(--notebook-lines) 24px
+      transparent 22px,
+      rgba(160, 175, 195, 0.4) 22px,
+      rgba(160, 175, 195, 0.35) 23px,
+      transparent 24px
     ),
     var(--notebook-white);
   padding: 1.5rem 1.5rem 1.5rem 3rem;
-  border-left: 2px solid #ffcdd2;
+  border-left: 2px solid rgba(200, 150, 150, 0.4);
   box-shadow:
-    1px 2px 5px rgba(0,0,0,0.2),
-    2px 4px 12px rgba(0,0,0,0.1);
+    0 1px 2px rgba(0,0,0,0.15),
+    1px 2px 5px rgba(0,0,0,0.08);
   font-family: var(--font-handwritten), cursive;
   font-size: 1.3rem;
   line-height: 1.85;
   color: var(--pen-blue);
+  clip-path: polygon(
+    0% 0%, 3% 0.3%, 10% 0%, 30% 0.2%, 50% 0%, 70% 0.3%, 90% 0%, 97% 0.2%, 100% 0.5%,
+    99.8% 15%, 100% 40%, 99.7% 65%, 100% 85%, 99.5% 100%,
+    97% 99.8%, 85% 100%, 60% 99.7%, 35% 100%, 10% 99.8%, 3% 100%, 0% 99.5%,
+    0.3% 85%, 0% 60%, 0.2% 35%, 0% 10%
+  );
 }
 
-.notebook:not(.focused):hover {
-  box-shadow:
-    2px 4px 10px rgba(0,0,0,0.25),
-    4px 8px 25px rgba(0,0,0,0.15);
-}
-
-/* Manila card/index card */
+/* Manila card - handled frequently */
 .manila-card {
-  background: var(--manila);
+  background:
+    /* Corner wear */
+    radial-gradient(ellipse 20px 20px at 95% 5%, rgba(180, 160, 130, 0.3) 0%, transparent 70%),
+    radial-gradient(ellipse 15px 15px at 5% 95%, rgba(170, 150, 120, 0.25) 0%, transparent 70%),
+    /* Fingerprint smudges */
+    radial-gradient(ellipse 25px 30px at 80% 50%, rgba(100, 80, 60, 0.04) 0%, transparent 70%),
+    /* Uneven color */
+    linear-gradient(140deg, var(--manila) 0%, #d0bc88 30%, var(--manila) 60%, #c8b480 100%);
   padding: 1.25rem 1.5rem;
   box-shadow:
-    1px 1px 3px rgba(0,0,0,0.2),
-    2px 3px 8px rgba(0,0,0,0.1);
+    0 1px 2px rgba(0,0,0,0.18),
+    1px 2px 4px rgba(0,0,0,0.1);
   font-family: var(--font-typewriter), monospace;
   font-size: 0.85rem;
   line-height: 1.7;
   color: var(--ink-black);
-  border-top: 3px solid var(--wood-light);
+  border-top: 2px solid rgba(100, 80, 60, 0.3);
+  clip-path: polygon(
+    0% 0%, 10% 0.2%, 30% 0%, 50% 0.3%, 75% 0%, 90% 0.2%, 100% 0%,
+    100% 2%, 99.6% 30%, 100% 60%, 99.7% 90%, 100% 100%,
+    90% 99.8%, 70% 100%, 40% 99.7%, 15% 100%, 0% 99.5%,
+    0.3% 85%, 0% 50%, 0.2% 20%, 0% 3%
+  );
 }
 
-.manila-card:not(.focused):hover {
-  box-shadow:
-    2px 3px 6px rgba(0,0,0,0.25),
-    3px 6px 15px rgba(0,0,0,0.15);
-}
-
-/* Torn paper scrap */
+/* Torn paper scrap - actually torn */
 .torn-scrap {
-  background: var(--cardstock);
+  background:
+    /* Pencil smudge */
+    radial-gradient(ellipse 35px 25px at 20% 60%, rgba(80, 75, 70, 0.06) 0%, transparent 70%),
+    /* Uneven surface */
+    linear-gradient(155deg, var(--cardstock) 0%, #dcd0bc 40%, var(--cardstock) 70%, #d4c8b4 100%);
   padding: 1.2rem 1.5rem;
   box-shadow:
-    1px 1px 4px rgba(0,0,0,0.2),
-    2px 3px 10px rgba(0,0,0,0.1);
+    0 1px 2px rgba(0,0,0,0.15),
+    1px 2px 4px rgba(0,0,0,0.08);
   font-family: var(--font-handwritten), cursive;
   font-size: 1.2rem;
   color: var(--pencil-gray);
-  border-radius: 3px 6px 4px 2px;
-  border-top: 1px solid rgba(255,255,255,0.5);
-  border-left: 1px solid rgba(255,255,255,0.3);
+  /* Actually torn looking */
+  clip-path: polygon(
+    3% 2%, 8% 0%, 12% 3%, 18% 0%, 25% 2%, 30% 0%, 38% 4%, 45% 1%, 52% 3%, 60% 0%, 68% 2%, 75% 0%, 82% 3%, 88% 1%, 94% 2%, 98% 0%, 100% 3%,
+    99% 10%, 100% 20%, 98% 35%, 100% 50%, 99% 65%, 100% 78%, 98% 88%, 100% 95%, 97% 100%,
+    92% 98%, 85% 100%, 78% 97%, 70% 100%, 62% 98%, 55% 100%, 48% 97%, 40% 100%, 32% 98%, 25% 100%, 18% 97%, 10% 100%, 5% 98%, 0% 100%,
+    2% 92%, 0% 82%, 3% 70%, 0% 58%, 2% 45%, 0% 32%, 3% 18%, 0% 8%
+  );
 }
 
-.torn-scrap:not(.focused):hover {
-  box-shadow:
-    2px 3px 8px rgba(0,0,0,0.25),
-    3px 6px 18px rgba(0,0,0,0.15);
-}
-
-/* Video/media reference - looks like a dark polaroid */
+/* Video/media - VHS tape aesthetic */
 .media-card {
-  background: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%);
+  background: linear-gradient(150deg, #1a1816 0%, #252220 50%, #1a1816 100%);
   padding: 0.5rem;
-  padding-bottom: 0.5rem;
   box-shadow:
-    2px 3px 8px rgba(0,0,0,0.4),
-    4px 6px 20px rgba(0,0,0,0.3);
-  color: var(--aged-paper);
-  border: 1px solid rgba(255,255,255,0.05);
+    0 2px 4px rgba(0,0,0,0.35),
+    2px 4px 10px rgba(0,0,0,0.25);
+  color: #d8cfc0;
+  border: 1px solid rgba(80, 70, 60, 0.3);
   overflow: hidden;
 }
 
 .media-card .media-placeholder {
-  background: linear-gradient(135deg, #3d3d3d 0%, #2a2a2a 100%);
-  background-size: cover;
+  background:
+    /* Scan lines */
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(0,0,0,0.1) 2px,
+      rgba(0,0,0,0.1) 4px
+    ),
+    linear-gradient(135deg, #2a2826 0%, #1f1d1b 100%);
+  background-size: cover, cover;
   background-position: center;
   aspect-ratio: 16 / 9;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 0.5rem;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(100, 90, 80, 0.2);
   position: relative;
 }
 
 .media-card .play-btn {
-  width: 36px;
-  height: 36px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255,255,255,0.3);
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(200, 180, 160, 0.25);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .media-card .title {
@@ -358,17 +431,11 @@ body {
 
 .media-card .author {
   font-size: 0.7rem;
-  opacity: 0.6;
+  opacity: 0.5;
   padding: 0 0.25rem;
 }
 
-.media-card:not(.focused):hover {
-  box-shadow:
-    4px 6px 16px rgba(0,0,0,0.5),
-    8px 12px 35px rgba(0,0,0,0.4);
-}
-
-/* Embedded video in media card */
+/* Embedded video */
 .media-card .media-embed {
   width: 100%;
 }
@@ -387,24 +454,39 @@ body {
 
 .media-card .media-info .author {
   font-size: 0.7rem;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
-/* Tape effect */
+/* ========================================
+   TAPE & PIN - More realistic
+   ======================================== */
+
+/* Tape - yellowed, wrinkled, imperfect */
 .has-tape::before {
   content: '';
   position: absolute;
-  top: -8px;
+  top: -6px;
   left: 50%;
-  transform: translateX(-50%) rotate(-2deg);
-  width: 60px;
-  height: 20px;
-  background: var(--tape);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  transform: translateX(-50%) rotate(-1.5deg);
+  width: 55px;
+  height: 18px;
+  background:
+    /* Wrinkle lines */
+    linear-gradient(90deg, transparent 20%, rgba(0,0,0,0.03) 22%, transparent 24%, transparent 45%, rgba(0,0,0,0.02) 47%, transparent 49%, transparent 70%, rgba(0,0,0,0.025) 72%, transparent 74%),
+    /* Yellowed tape */
+    linear-gradient(180deg, rgba(200, 185, 140, 0.6) 0%, rgba(210, 195, 150, 0.55) 50%, rgba(195, 180, 135, 0.6) 100%);
+  box-shadow:
+    0 1px 1px rgba(0,0,0,0.08),
+    inset 0 0 3px rgba(255,255,255,0.1);
   z-index: 1;
+  /* Torn tape edges */
+  clip-path: polygon(
+    2% 0%, 8% 5%, 15% 0%, 25% 3%, 35% 0%, 50% 4%, 65% 0%, 78% 2%, 88% 0%, 95% 3%, 100% 0%,
+    100% 100%, 92% 97%, 82% 100%, 70% 96%, 55% 100%, 40% 97%, 28% 100%, 15% 96%, 5% 100%, 0% 98%
+  );
 }
 
-/* Pin effect */
+/* Pin - worn, not shiny */
 .has-pin {
   overflow: visible !important;
 }
@@ -412,36 +494,34 @@ body {
 .has-pin::before {
   content: '';
   position: absolute;
-  top: -8px;
+  top: -7px;
   left: 50%;
   transform: translateX(-50%);
-  width: 14px;
-  height: 14px;
-  background: radial-gradient(circle at 35% 35%, #ff6b6b 0%, #e74c3c 40%, var(--pin-red) 70%, #7f1d1d 100%);
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle at 40% 40%, #c55 0%, var(--pin-red) 50%, #6a1a15 100%);
   border-radius: 50%;
   box-shadow:
-    0 2px 4px rgba(0,0,0,0.4),
-    0 1px 2px rgba(0,0,0,0.2),
-    inset 0 -2px 4px rgba(0,0,0,0.2);
+    0 1px 2px rgba(0,0,0,0.35),
+    inset 0 -1px 2px rgba(0,0,0,0.25);
   z-index: 10;
 }
 
-/* Attribution line */
+/* Attribution - faded */
 .attribution {
   margin-top: 1rem;
   font-size: 0.8rem;
-  opacity: 0.6;
+  opacity: 0.5;
   text-align: right;
   font-style: normal;
   font-family: var(--font-serif), serif;
 }
 
-
-/* Focus overlay */
+/* Focus overlay - darker */
 .focus-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(20, 15, 12, 0);
+  background: rgba(15, 12, 10, 0);
   backdrop-filter: blur(0px);
   -webkit-backdrop-filter: blur(0px);
   z-index: 500;
@@ -453,9 +533,9 @@ body {
 }
 
 .focus-overlay.active {
-  background: rgba(20, 15, 12, 0.8);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  background: rgba(15, 12, 10, 0.85);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
   pointer-events: auto;
   cursor: pointer;
 }
@@ -463,9 +543,10 @@ body {
 /* Dragging state */
 .fragment.dragging {
   cursor: grabbing !important;
+  filter: brightness(1.02);
   box-shadow:
-    0 25px 50px rgba(0,0,0,0.5),
-    0 12px 20px rgba(0,0,0,0.3) !important;
+    0 15px 35px rgba(0,0,0,0.4),
+    0 8px 15px rgba(0,0,0,0.25) !important;
 }
 
 /* Mobile: stack vertically */
@@ -490,9 +571,9 @@ body {
   }
 }
 
-/* Scrollbar */
+/* Scrollbar - wood tone */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -501,5 +582,5 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--wood-light);
-  border-radius: 4px;
+  border-radius: 3px;
 }
